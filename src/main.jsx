@@ -13,9 +13,9 @@ const startingState = {
     riskTolerance: 'Moderate',
   },
   goals: [
-    'Increase profitable passenger capacity without overextending cash reserves.',
-    'Keep on-time performance above 88%.',
-    'Prepare an expansion plan for underserved coastal routes.',
+    { rowKey: 'goal-1', text: 'Increase profitable passenger capacity without overextending cash reserves.' },
+    { rowKey: 'goal-2', text: 'Keep on-time performance above 88%.' },
+    { rowKey: 'goal-3', text: 'Prepare an expansion plan for underserved coastal routes.' },
   ],
   fleet: [
     { id: 'PP-101', model: 'Puffin Dash 8', age: 3, condition: 91, utilization: 82, route: 'Reykjavik ↔ Tórshavn', margin: 18 },
@@ -42,7 +42,12 @@ function currency(value) {
 }
 
 function numberInput(value, onChange, props = {}) {
-  return <input type="number" value={value} onChange={(event) => onChange(Number(event.target.value))} {...props} />;
+  return <input type="number" value={value} onChange={(event) => {
+    const numValue = Number(event.target.value);
+    if (!isNaN(numValue)) {
+      onChange(numValue);
+    }
+  }} {...props} />;
 }
 
 function App() {
@@ -117,11 +122,11 @@ function App() {
 
       <div className="panel">
         <h2>COO objectives</h2>
-        {state.goals.map((goal, index) => <div className="row" key={index}>
-          <input value={goal} onChange={(event) => setState((prev) => ({ ...prev, goals: prev.goals.map((item, itemIndex) => itemIndex === index ? event.target.value : item) }))} />
+        {state.goals.map((goal, index) => <div className="row" key={goal.rowKey}>
+          <input value={goal.text} onChange={(event) => setState((prev) => ({ ...prev, goals: prev.goals.map((item, itemIndex) => itemIndex === index ? { ...item, text: event.target.value } : item) }))} />
           <button className="icon" onClick={() => removeArrayItem('goals', index)} aria-label="Remove objective"><Trash2 size={16} /></button>
         </div>)}
-        <button onClick={() => setState((prev) => ({ ...prev, goals: [...prev.goals, ''] }))}><Plus size={16} /> Add objective</button>
+        <button onClick={() => setState((prev) => ({ ...prev, goals: [...prev.goals, { rowKey: `goal-${Date.now()}`, text: '' }] }))}><Plus size={16} /> Add objective</button>
       </div>
     </section>
 
