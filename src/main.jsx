@@ -18,14 +18,14 @@ const startingState = {
     'Prepare an expansion plan for underserved coastal routes.',
   ],
   fleet: [
-    { rowKey: crypto.randomUUID(), id: 'PP-101', model: 'Puffin Dash 8', age: 3, condition: 91, utilization: 82, route: 'Reykjavik ↔ Tórshavn', margin: 18 },
-    { rowKey: crypto.randomUUID(), id: 'PP-204', model: 'Heron 220', age: 7, condition: 76, utilization: 68, route: 'Bergen ↔ Lerwick', margin: 11 },
-    { rowKey: crypto.randomUUID(), id: 'PP-312', model: 'Auk Regional', age: 1, condition: 97, utilization: 88, route: 'Edinburgh ↔ Kirkwall', margin: 24 },
+    { id: 'PP-101', model: 'Puffin Dash 8', age: 3, condition: 91, utilization: 82, route: 'Reykjavik ↔ Tórshavn', margin: 18 },
+    { id: 'PP-204', model: 'Heron 220', age: 7, condition: 76, utilization: 68, route: 'Bergen ↔ Lerwick', margin: 11 },
+    { id: 'PP-312', model: 'Auk Regional', age: 1, condition: 97, utilization: 88, route: 'Edinburgh ↔ Kirkwall', margin: 24 },
   ],
   routes: [
-    { rowKey: crypto.randomUUID(), name: 'Reykjavik ↔ Tórshavn', demand: 81, competition: 38, satisfaction: 86, notes: 'High cargo add-on opportunity.' },
-    { rowKey: crypto.randomUUID(), name: 'Bergen ↔ Lerwick', demand: 57, competition: 22, satisfaction: 79, notes: 'Thin route; watch fuel cost sensitivity.' },
-    { rowKey: crypto.randomUUID(), name: 'Edinburgh ↔ Kirkwall', demand: 92, competition: 55, satisfaction: 91, notes: 'Candidate for frequency increase.' },
+    { name: 'Reykjavik ↔ Tórshavn', demand: 81, competition: 38, satisfaction: 86, notes: 'High cargo add-on opportunity.' },
+    { name: 'Bergen ↔ Lerwick', demand: 57, competition: 22, satisfaction: 79, notes: 'Thin route; watch fuel cost sensitivity.' },
+    { name: 'Edinburgh ↔ Kirkwall', demand: 92, competition: 55, satisfaction: 91, notes: 'Candidate for frequency increase.' },
   ],
   staff: {
     pilots: 18,
@@ -56,8 +56,8 @@ function App() {
   }, null, 2), [state]);
 
   const healthScore = useMemo(() => {
-    const fleetAvg = state.fleet.length ? state.fleet.reduce((sum, plane) => sum + plane.condition, 0) / state.fleet.length : 0;
-    const routeAvg = state.routes.length ? state.routes.reduce((sum, route) => sum + route.satisfaction, 0) / state.routes.length : 0;
+    const fleetAvg = state.fleet.reduce((sum, plane) => sum + plane.condition, 0) / state.fleet.length;
+    const routeAvg = state.routes.reduce((sum, route) => sum + route.satisfaction, 0) / state.routes.length;
     return Math.round((fleetAvg + routeAvg + state.staff.morale + state.meta.reputation) / 4);
   }, [state]);
 
@@ -70,13 +70,9 @@ function App() {
   const removeArrayItem = (section, index) => setState((prev) => ({ ...prev, [section]: prev[section].filter((_, itemIndex) => itemIndex !== index) }));
 
   const copyDump = async () => {
-    try {
-      await navigator.clipboard.writeText(cooDump);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch (error) {
-      console.error('Failed to copy COO dump', error);
-    }
+    await navigator.clipboard.writeText(cooDump);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
   };
 
   const downloadDump = () => {
@@ -131,25 +127,25 @@ function App() {
 
     <section className="panel">
       <h2>Fleet</h2>
-      <div className="cards">{state.fleet.map((plane, index) => <article className="mini-card" key={plane.rowKey}>
-        <div className="card-title"><input value={plane.id} onChange={(event) => updateArrayItem('fleet', index, 'id', event.target.value)} /><button className="icon" onClick={() => removeArrayItem('fleet', index)} aria-label="Remove aircraft"><Trash2 size={16} /></button></div>
+      <div className="cards">{state.fleet.map((plane, index) => <article className="mini-card" key={plane.id}>
+        <div className="card-title"><input value={plane.id} onChange={(event) => updateArrayItem('fleet', index, 'id', event.target.value)} /><button className="icon" onClick={() => removeArrayItem('fleet', index)}><Trash2 size={16} /></button></div>
         <label>Model<input value={plane.model} onChange={(event) => updateArrayItem('fleet', index, 'model', event.target.value)} /></label>
         <label>Route<input value={plane.route} onChange={(event) => updateArrayItem('fleet', index, 'route', event.target.value)} /></label>
         <div className="inline"><label>Age{numberInput(plane.age, (value) => updateArrayItem('fleet', index, 'age', value))}</label><label>Condition{numberInput(plane.condition, (value) => updateArrayItem('fleet', index, 'condition', value))}</label></div>
         <div className="inline"><label>Utilization{numberInput(plane.utilization, (value) => updateArrayItem('fleet', index, 'utilization', value))}</label><label>Margin %{numberInput(plane.margin, (value) => updateArrayItem('fleet', index, 'margin', value))}</label></div>
       </article>)}</div>
-      <button onClick={() => setState((prev) => ({ ...prev, fleet: [...prev.fleet, { rowKey: crypto.randomUUID(), id: 'PP-New', model: '', age: 0, condition: 100, utilization: 0, route: '', margin: 0 }] }))}><Plus size={16} /> Add aircraft</button>
+      <button onClick={() => setState((prev) => ({ ...prev, fleet: [...prev.fleet, { id: 'PP-New', model: '', age: 0, condition: 100, utilization: 0, route: '', margin: 0 }] }))}><Plus size={16} /> Add aircraft</button>
     </section>
 
     <section className="panel">
       <h2>Routes</h2>
-      <div className="cards">{state.routes.map((route, index) => <article className="mini-card" key={route.rowKey}>
-        <div className="card-title"><input value={route.name} onChange={(event) => updateArrayItem('routes', index, 'name', event.target.value)} /><button className="icon" onClick={() => removeArrayItem('routes', index)} aria-label="Remove route"><Trash2 size={16} /></button></div>
+      <div className="cards">{state.routes.map((route, index) => <article className="mini-card" key={route.name}>
+        <div className="card-title"><input value={route.name} onChange={(event) => updateArrayItem('routes', index, 'name', event.target.value)} /><button className="icon" onClick={() => removeArrayItem('routes', index)}><Trash2 size={16} /></button></div>
         <div className="inline"><label>Demand{numberInput(route.demand, (value) => updateArrayItem('routes', index, 'demand', value))}</label><label>Competition{numberInput(route.competition, (value) => updateArrayItem('routes', index, 'competition', value))}</label></div>
         <label>Satisfaction{numberInput(route.satisfaction, (value) => updateArrayItem('routes', index, 'satisfaction', value))}</label>
         <label>Notes<textarea value={route.notes} onChange={(event) => updateArrayItem('routes', index, 'notes', event.target.value)} /></label>
       </article>)}</div>
-      <button onClick={() => setState((prev) => ({ ...prev, routes: [...prev.routes, { rowKey: crypto.randomUUID(), name: '', demand: 0, competition: 0, satisfaction: 0, notes: '' }] }))}><Plus size={16} /> Add route</button>
+      <button onClick={() => setState((prev) => ({ ...prev, routes: [...prev.routes, { name: '', demand: 0, competition: 0, satisfaction: 0, notes: '' }] }))}><Plus size={16} /> Add route</button>
     </section>
 
     <section className="grid two">
